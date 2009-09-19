@@ -1,5 +1,6 @@
 .DS_Store
 cache/*
+log/*
 data/sql/schema.sql
 lib/filter/doctrine/base/*
 lib/form/doctrine/base/*
