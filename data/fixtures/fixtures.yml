@@ -1,17 +1,35 @@
-# # Populate this file with data to be loaded by your ORM's *:data-load task.
-# # You can create multiple files in this directory (i.e. 010_users.yml,
-# # 020_articles.yml, etc) which will be loaded in alphabetical order.
-# # 
-# # See documentation for your ORM's *:data-load task for more information.
-# 
-# User:
-#   fabien:
-#     username: fabien
-#     password: changeme
-#     name:     Fabien Potencier
-#     email:    fabien.potencier@symfony-project.com
-#   kris:
-#     username: Kris.Wallsmith
-#     password: changeme
-#     name:     Kris Wallsmith
-#     email:    kris.wallsmith@symfony-project.com
+Block:
+  block_01:
+    title: block 01
+    description: |
+      Interactively develop optimal expertise and fully tested growth strategies. Seamlessly deliver revolutionary resources with turnkey best practices. Rapidiously network integrated opportunities through pandemic experiences. 
+
+      Continually deliver client-focused niches through premier supply chains. Rapidiously fashion impactful quality vectors before interdependent growth strategies. Rapidiously initiate interactive metrics without resource-leveling networks.
+    importance: 0
+
+  block_02:
+    title: block 02
+    description: |
+      Distinctively enhance enterprise-wide ROI for principle-centered deliverables. Dynamically generate vertical value with cross functional quality vectors. Continually restore global portals after equity invested vortals. 
+
+      Credibly foster user-centric relationships through seamless content. Proactively engineer next-generation catalysts for change with innovative interfaces. Compellingly embrace magnetic human capital without resource maximizing platforms.
+    importance: 127
+
+BlockPosition:
+  bp_01:
+    Block: block_01
+
+    width: 10
+    height: 10
+
+    position_x: 10
+    position_y: 10
+
+  bp_02:
+    Block: block_02
+
+    width: 30
+    height: 30
+
+    position_x: 30
+    position_y: 30
