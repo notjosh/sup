@@ -1,0 +1,21 @@
+Block:
+  actAs: [Timestampable]
+  columns:
+    title: string(255)
+    description: text
+    importance: integer
+
+BlockPosition:
+  actAs: [Timestampable]
+  columns:
+    width: integer
+    height: integer
+    position_x: integer
+    position_y: integer
+
+    block_id: integer
+  relations:
+    Block:
+      local: block_id
+      foreign: id
+      foreignType: one
