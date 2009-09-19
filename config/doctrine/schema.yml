@@ -1,4 +1,4 @@
-Block:
+BlockData:
   actAs: [Timestampable]
   columns:
     title: string(255)
@@ -13,9 +13,17 @@ BlockPosition:
     position_x: integer
     position_y: integer
 
-    block_id: integer
+Block:
+  columns:
+    block_data_id: integer
+    block_position_id: integer
+
   relations:
-    Block:
-      local: block_id
+    BlockData:
+      local: block_data_id
+      foreign: id
+      foreignType: one
+    BlockPosition:
+      local: block_position_id
       foreign: id
       foreignType: one

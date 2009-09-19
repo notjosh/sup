@@ -19,6 +19,8 @@ class blockActions extends sfActions
 		// get all blocks
 		$blocks = Doctrine::getTable('Block')
 			->createQuery('b')
+			->innerJoin('b.BlockData bd')
+			->innerJoin('b.BlockPosition bp')
 			->execute();
 
 		$this->blocks = $blocks;

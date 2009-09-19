@@ -1,5 +1,5 @@
-Block:
-  block_01:
+BlockData:
+  block_data_01:
     title: block 01
     description: |
       Interactively develop optimal expertise and fully tested growth strategies. Seamlessly deliver revolutionary resources with turnkey best practices. Rapidiously network integrated opportunities through pandemic experiences. 
@@ -7,7 +7,7 @@ Block:
       Continually deliver client-focused niches through premier supply chains. Rapidiously fashion impactful quality vectors before interdependent growth strategies. Rapidiously initiate interactive metrics without resource-leveling networks.
     importance: 0
 
-  block_02:
+  block_data_02:
     title: block 02
     description: |
       Distinctively enhance enterprise-wide ROI for principle-centered deliverables. Dynamically generate vertical value with cross functional quality vectors. Continually restore global portals after equity invested vortals. 
@@ -17,8 +17,6 @@ Block:
 
 BlockPosition:
   bp_01:
-    Block: block_01
-
     width: 10
     height: 10
 
@@ -26,10 +24,16 @@ BlockPosition:
     position_y: 10
 
   bp_02:
-    Block: block_02
-
-    width: 30
-    height: 30
+    width: 25
+    height: 25
 
     position_x: 30
     position_y: 30
+
+Block:
+  block_01:
+    BlockData: block_data_01
+    BlockPosition: bp_01
+  block_02:
+    BlockData: block_data_02
+    BlockPosition: bp_02

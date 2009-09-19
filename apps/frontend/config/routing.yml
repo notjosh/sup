@@ -1,7 +1,14 @@
+# block API rules
+block:
+  url: /block/:action/*.:sf_format
+  param: { module: block, generate_shortest_url: true, sf_format: json }
+  requirements:
+    sf_format: (json)
+
 # default rules
 homepage:
   url:   /
-  param: { module: block, action: index }
+  param: { module: static, action: home }
 
 # generic rules
 # please, remove them by adding more specific rules
