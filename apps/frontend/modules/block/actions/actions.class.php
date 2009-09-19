@@ -28,11 +28,23 @@ class blockActions extends sfActions
   {
     $this->forward404Unless($request->isMethod(sfRequest::POST));
 
-    $this->form = new BlockForm();
+		$bPost = $request->getParameter('block');
 
-    $this->processForm($request, $this->form);
+		$bData = new BlockData();
+		$bData->fromArray($bPost['block_data']);
 
-    $this->setTemplate('new');
+		$bPosition = new BlockPosition();
+		$bPosition->fromArray($bPost['block_position']);
+
+		$block = new Block();
+		$block->set('BlockData', $bData);
+		$block->set('BlockPosition', $bPosition);
+
+		$block->save();
+
+		$this->block = $block;
+
+    $this->setTemplate('show');
   }
 
   public function executeEdit(sfWebRequest $request)
@@ -59,17 +71,17 @@ class blockActions extends sfActions
 
 		$block->save();
 
-    $this->setTemplate('edit');
+		$this->block = $block;
+
+    $this->setTemplate('show');
   }
 
   public function executeDelete(sfWebRequest $request)
   {
-    $request->checkCSRFProtection();
-
-    $this->forward404Unless($block = Doctrine::getTable('Block')->find($request->getParameter('id')), sprintf('Object block does not exist (%s).', $request->getParameter('id')));
+		$this->forward404Unless($block = Doctrine::getTable('Block')->find($request->getParameter('id')), sprintf('Object block does not exist (%s).', $request->getParameter('id')));
     $block->delete();
 
-    $this->redirect('block/index');
+		return sfView::NONE;
   }
 
   protected function processForm(sfWebRequest $request, sfForm $form)

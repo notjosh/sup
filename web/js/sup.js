@@ -41,12 +41,58 @@ Sup.Model.Block = function(params) {
 Sup.Controller = function(container) {
   this.blocks = [];
   this.container = container;
+  this.form;
 
   this.templates = {
-    blockContainer: '<div><p class="title" /></div>'
+    blockContainer: '<div class="block-container"><p class="title" /><div class="actions"><div class="action-delete" /><div class="action-edit" /></div></div>',
+    blockForm: '<div class="block-form"><div class="form-row"><label>Title</label><input type="text" name="title" id="block-form-title" /></div><div class="form-row"><label>Importance</label><div id="block-form-slider-importance"><div><img src="/images/gradient.png" /></div><div class="c" /></div></div><div class="form-row centre"><input type="submit" value="create" id="block-form-submit" /> <input type="button" value="cancel" id="block-form-cancel" /></div>',
+    createButton: '<div id="block-create-button" />'
   };
+}
 
-  $(this).bind('resize', function() { console.log('wow'); });
+Sup.Controller.prototype.initialise = function() {
+  // create add button
+  var cs = this;
+  $(this.templates.createButton)
+    .appendTo(this.container)
+    .click(function() {
+      console.log('add button');
+      cs.showCreateForm();
+    });
+
+  // fetch blocks
+  this.fetchBlocks();
+}
+
+Sup.Controller.prototype.fetchBlocks = function() {
+  var cs = this;
+
+	$.getJSON('/frontend_dev.php/block/index.json', function(data) {
+		$.each(data, function(i, block) {
+			var bd = new Sup.Model.BlockData({
+				id:          block.BlockData.id,
+				title:       block.BlockData.title,
+				description: block.BlockData.description,
+				importance:  block.BlockData.importance
+			});
+
+			var bp = new Sup.Model.BlockPosition({
+				id:        block.BlockPosition.id,
+				positionX: block.BlockPosition.position_x,
+				positionY: block.BlockPosition.position_y,
+				width:     block.BlockPosition.width,
+				height:    block.BlockPosition.height
+			});
+
+			var b = new Sup.Model.Block({
+				id:            block.id,
+				blockData:     bd,
+				blockPosition: bp
+			});
+
+			cs.addBlock(b);
+		});
+	});
 }
 
 Sup.Controller.prototype.onBlockPositionChanged = function(blockTemplate) {
@@ -60,7 +106,9 @@ Sup.Controller.prototype.onBlockPositionChanged = function(blockTemplate) {
   this.saveBlock(block);
 }
 
-Sup.Controller.prototype.saveBlock = function(block) {
+Sup.Controller.prototype.saveBlock = function(block, callback) {
+  callback = callback || function() {};
+
   var dataObj = {
     'block[id]': block.id,
     'block[block_data][id]': block.blockData.id,
@@ -77,7 +125,58 @@ Sup.Controller.prototype.saveBlock = function(block) {
   // @todo: dynamic URL
   var updateUrl = '/frontend_dev.php/block/update.json?id=' + block.id;
   $.post(updateUrl, 
-    $.param(dataObj)
+    $.param(dataObj),
+    function(blockResult) {
+      callback(block);
+    }, 'json'
+  );
+}
+
+Sup.Controller.prototype.createBlock = function(block, callback) {
+  callback = callback || function() {};
+
+  var dataObj = {
+    'block[block_data][title]': block.blockData.title,
+    'block[block_data][description]': block.blockData.description,
+    'block[block_data][importance]': block.blockData.importance,
+    'block[block_position][width]': block.blockPosition.width,
+    'block[block_position][height]': block.blockPosition.height,
+    'block[block_position][position_x]': block.blockPosition.positionX,
+    'block[block_position][position_y]': block.blockPosition.positionY
+  };
+
+  // @todo: dynamic URL
+  var updateUrl = '/frontend_dev.php/block/create.json';
+  var cs = this;
+
+  $.post(updateUrl, 
+    $.param(dataObj),
+    function(block) {
+      var bd = new Sup.Model.BlockData({
+       id:          block.BlockData.id,
+       title:       block.BlockData.title,
+       description: block.BlockData.description,
+       importance:  block.BlockData.importance
+      });
+      
+      var bp = new Sup.Model.BlockPosition({
+       id:        block.BlockPosition.id,
+       positionX: block.BlockPosition.position_x,
+       positionY: block.BlockPosition.position_y,
+       width:     block.BlockPosition.width,
+       height:    block.BlockPosition.height
+      });
+      
+      var b = new Sup.Model.Block({
+       id:            block.id,
+       blockData:     bd,
+       blockPosition: bp
+      });
+
+      cs.addBlock(b);
+
+      callback(b);
+    }, 'json'
   );
 }
 
@@ -92,8 +191,11 @@ Sup.Controller.prototype.drawBlock = function(block) {
   // @todo check typeof block
 
   var template = $(this.templates.blockContainer).css({
-    position: 'absolute'
+    position: 'absolute',
+    display: 'none'
   });
+
+  this.addBlockActions(template, block);
 
   var sc = this;
 
@@ -110,6 +212,8 @@ Sup.Controller.prototype.drawBlock = function(block) {
   $(template).resizable({
     containment: 'parent',
     handles: 'ne, se, sw, nw',
+    minHeight: 25,
+    minWidth: 60,
     stop: function(event, ui) {
       sc.onBlockPositionChanged(ui.helper);
     }
@@ -117,7 +221,8 @@ Sup.Controller.prototype.drawBlock = function(block) {
 
   template.appendTo(this.container)
     .data('block', block)
-    .addClass('block');
+    .addClass('block')
+    .fadeIn('fast');
 
   template.find('.title').text(block.blockData.title);
 
@@ -141,6 +246,128 @@ Sup.Controller.prototype.positionBlockTemplate = function(blockTemplate) {
     height: this.container.height() * (blockTemplate.data('block').blockPosition.height * .01),
     backgroundColor: Sup.Util.hexColourFromImportance(blockTemplate.data('block').blockData.importance)
   });
+}
+
+Sup.Controller.prototype.addBlockActions = function(blockTemplate, block) {
+  var cs = this;
+
+  $(blockTemplate).find('.actions .action-delete').click(function() {
+    if (!confirm('oh for srs?'))
+    {
+      return;
+    }
+
+    // delete
+    // @todo: dynamic URL
+    var deleteUrl = '/frontend_dev.php/block/delete.json?id=' + block.id;
+    var cs = this;
+
+    $.post(deleteUrl,
+      function() {
+        blockTemplate.fadeOut('fast', function() { blockTemplate.remove(); });
+      }, 'json'
+    );
+  });
+
+  $(blockTemplate).find('.actions .action-edit').click(function() {
+    // edit
+
+    cs.showEditForm(blockTemplate);
+  });
+}  
+
+Sup.Controller.prototype.clearBlockForm = function() {
+  $('#block-form-title').val('');
+}
+
+Sup.Controller.prototype.getForm = function()
+{
+  if (!this.form)
+  {
+    var cs = this;
+
+    this.form = $(this.templates.blockForm).appendTo(this.container);
+
+    $('#block-form-slider-importance .c').slider({
+      value:127,
+      min: 0,
+      max: 255
+    });
+
+    $('#block-form-cancel').click(function() {
+      cs.form.fadeOut('fast', function() { cs.clearBlockForm(); });
+      return false;
+    });
+
+  }
+
+  return this.form;
+}
+
+Sup.Controller.prototype.showCreateForm = function()
+{
+  var form = this.getForm();
+  var cs = this;
+  
+  $('#block-form-submit').val('create');
+
+  $('#block-form-submit').unbind('click').click(function() {
+		var bd = new Sup.Model.BlockData({
+			title:       $('#block-form-title').val(),
+			description: '',
+			importance:  $('#block-form-slider-importance .c').slider('value')
+		});
+
+		var bp = new Sup.Model.BlockPosition({
+			positionX: Math.floor(Math.random() * 25) + 25,
+			positionY: Math.floor(Math.random() * 25) + 25,
+			width:     Math.floor(Math.random() * 25) + 25,
+			height:    Math.floor(Math.random() * 25) + 25
+		});
+
+		var b = new Sup.Model.Block({
+			blockData:     bd,
+			blockPosition: bp
+		});
+
+    cs.createBlock(b, function() {
+      cs.form.fadeOut('fast', function() { cs.clearBlockForm(); });
+    });
+
+    return false;
+  });
+
+  form.fadeIn('fast');
+}
+
+Sup.Controller.prototype.showEditForm = function(blockTemplate)
+{
+  var form = this.getForm();
+  var cs = this;
+
+  var block = blockTemplate.data('block');
+
+  $('#block-form-title').val(block.blockData.title);
+  $('#block-form-slider-importance .c').slider('value', block.blockData.importance);
+  $('#block-form-submit').val('update');
+
+
+  $('#block-form-submit').unbind('click').click(function() {
+    block.blockData.title = $('#block-form-title').val();
+    block.blockData.importance = $('#block-form-slider-importance .c').slider('value');
+
+    cs.saveBlock(block, function(block) {
+      blockTemplate.find('.title').text(block.blockData.title);
+      blockTemplate.css({
+        backgroundColor: Sup.Util.hexColourFromImportance(block.blockData.importance)
+      });
+      cs.form.fadeOut('fast', function() { cs.clearBlockForm(); });
+    });
+
+    return false;
+  });
+
+  form.fadeIn('fast');
 }
 
 // Sup.Block.prototype.initialise = function() {
@@ -179,9 +406,9 @@ $(function() {
   var c = $('<div class="sup-container" />')
     .appendTo($('body'))
     .css({
-      width: $(document).width() - 2,
-      height: $(document).height() - 2,
-      border: '1px solid #aaa'
+      width: $(document).width(),
+      height: $(document).height()
+//      border: '1px solid #aaa'
     });
 
   $(window).bind('resize', function() {
@@ -199,4 +426,6 @@ $(function() {
   });
 
   window.sup = new Sup.Controller(c);
+  window.sup.initialise();
+
 });

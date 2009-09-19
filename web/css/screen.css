@@ -6,3 +6,107 @@ body
 
 	font-size: 62.5%;
 }
+
+/* blocks */
+div.block-container
+{
+	position: absolute;
+}
+
+div.block-container div.actions
+{
+	display: block;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+}
+
+div.block-container div.actions div,
+div#block-create-button
+{
+	width: 16px;
+	height: 16px;
+	float: left;
+	margin-right: 3px;
+}
+
+div.block-container div.actions div:hover,
+div#block-create-button:hover
+{
+	cursor: pointer;
+}
+
+div.block-container div.actions div.action-link
+{
+	background-image: url(../images/icon/link.png);
+}
+
+div.block-container div.actions div.action-edit
+{
+	background-image: url(../images/icon/write.png);
+}
+
+div.block-container div.actions div.action-delete
+{
+	background-image: url(../images/icon/trash.png);
+}
+
+div#block-create-button
+{
+	position: absolute;
+	bottom: 0;
+	background-image: url(../images/icon/plus.png);
+}
+
+/* forms */
+div.block-form
+{
+	padding: 5px;
+  width: 200px;
+  height: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+
+	background-color: #ccc;
+	border: 1px solid #bbb;
+}
+
+div#block-form-slider-importance
+{
+	margin: 3px auto 6px;
+}
+
+div.form-row
+{
+	width: 90%;
+	margin: 0 auto;
+}
+
+div.form-row.centre
+{
+	text-align: center;
+}
+
+div.form-row input.hidden
+{
+	display: none;
+}
+
+div.form-row label
+{
+	display: block;
+}
+
+div.form-row input[type=text]
+{
+	width: 100%;
+	border: none;
+}
+
+div.form-row input[type=submit],
+div.form-row input[type=button]
+{
+	width: 45%;
+	border: none;
+}
