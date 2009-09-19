@@ -9,7 +9,6 @@ $(function() {
 				title:       block.BlockData.title,
 				description: block.BlockData.description,
 				importance:  block.BlockData.importance
-		// importance: 128
 			});
 
 			var bp = new Sup.Model.BlockPosition({

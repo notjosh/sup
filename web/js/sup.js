@@ -11,7 +11,7 @@ Sup.Model.BlockData = function(params) {
   params = params || {};
 
   this.id          = 'undefined' != typeof params.id ? params.id : 'untitled';
-  this.title       = 'undefined' != typeof params.title ? params.description : 'untitled';
+  this.title       = 'undefined' != typeof params.title ? params.title : 'untitled';
   this.description = 'undefined' != typeof params.description ? params.description : 'description';
   this.importance  = 'undefined' != typeof params.importance ? params.importance : 'importance';
 };
@@ -43,10 +43,42 @@ Sup.Controller = function(container) {
   this.container = container;
 
   this.templates = {
-    blockContainer: '<div />'
+    blockContainer: '<div><p class="title" /></div>'
   };
 
   $(this).bind('resize', function() { console.log('wow'); });
+}
+
+Sup.Controller.prototype.onBlockPositionChanged = function(blockTemplate) {
+  var block = blockTemplate.data('block');
+
+  block.blockPosition.positionX = ((parseInt(blockTemplate.css('left')) / this.container.width()) * 100).toFixed(2);
+  block.blockPosition.positionY = ((parseInt(blockTemplate.css('top')) / this.container.height()) * 100).toFixed(2);
+  block.blockPosition.width = ((blockTemplate.width() / this.container.width()) * 100).toFixed(2);
+  block.blockPosition.height = ((blockTemplate.height() / this.container.height()) * 100).toFixed(2);
+
+  this.saveBlock(block);
+}
+
+Sup.Controller.prototype.saveBlock = function(block) {
+  var dataObj = {
+    'block[id]': block.id,
+    'block[block_data][id]': block.blockData.id,
+    'block[block_data][title]': block.blockData.title,
+    'block[block_data][description]': block.blockData.description,
+    'block[block_data][importance]': block.blockData.importance,
+    'block[block_position][id]': block.blockPosition.id,
+    'block[block_position][width]': block.blockPosition.width,
+    'block[block_position][height]': block.blockPosition.height,
+    'block[block_position][position_x]': block.blockPosition.positionX,
+    'block[block_position][position_y]': block.blockPosition.positionY
+  };
+
+  // @todo: dynamic URL
+  var updateUrl = '/frontend_dev.php/block/update.json?id=' + block.id;
+  $.post(updateUrl, 
+    $.param(dataObj)
+  );
 }
 
 Sup.Controller.prototype.addBlock = function(block) {
@@ -63,9 +95,31 @@ Sup.Controller.prototype.drawBlock = function(block) {
     position: 'absolute'
   });
 
+  var sc = this;
+
+  $(template).draggable({
+    containment: 'parent',
+    opacity: 0.35,
+    stack: { group: 'block', min: 50 },
+    zIndex: 999,
+    stop: function(event, ui) {
+      sc.onBlockPositionChanged(ui.helper);
+    }
+  });
+
+  $(template).resizable({
+    containment: 'parent',
+    handles: 'ne, se, sw, nw',
+    stop: function(event, ui) {
+      sc.onBlockPositionChanged(ui.helper);
+    }
+  });
+
   template.appendTo(this.container)
     .data('block', block)
     .addClass('block');
+
+  template.find('.title').text(block.blockData.title);
 
   this.positionBlockTemplate(template);
 }

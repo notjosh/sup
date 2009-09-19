@@ -1,6 +1,6 @@
 <?php $a = array() ?>
 
-<?php foreach ($block_list as $block): ?>
+<?php foreach ($blocks as $block): ?>
 	<?php $a[] = $block->toArray()->getRawValue() ?>
 <?php endforeach ?>
 
